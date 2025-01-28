@@ -190,17 +190,14 @@ class Tor_Filter
 			{
 				foreach($Sort_Order as $name => $sort_values)
 				{
-					if(array_key_exists($name, $Target_Array))
+					$sort_argument[] = &array_column($Target_Array, $name);						
+					if(isset($sort_values['order']))
 					{
-						$sort_argument[] = array_column($Target_Array, $name);
-						if(isset($sort_values['order']))
-						{
-							$sort_argument[] = $sort_values['order'];
-						}
-						if(isset($sort_values['flags']))
-						{
-							$sort_argument[] = $sort_values['flags'];
-						}
+						$sort_argument[] = $sort_values['order'];
+					}
+					if(isset($sort_values['flags']))
+					{
+						$sort_argument[] = $sort_values['flags'];
 					}
 				}
 			}
@@ -208,7 +205,6 @@ class Tor_Filter
         $sort_argument[] = &$Target_Array;
         call_user_func_array("array_multisort", $sort_argument);
         $return_flag = true;
-        
         return $return_flag;
     }
 
@@ -226,7 +222,7 @@ class Tor_Filter
 
 	public function GetVersion()
     {
-        return __NAMESPACE__ . " Ver.2.1";
+        return __NAMESPACE__ . " Ver.2.2";
     }
 
 }

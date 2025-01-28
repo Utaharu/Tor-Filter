@@ -53,7 +53,7 @@ class Function_Config
 										"ip" =>
 											array(
 												"order" => SORT_ASC,
-												"flags" => SORT_STRING
+												"flags" => SORT_NUMERIC
 											)
 										),
 								/* 抽出したデータ配列を文字列に置き換える為の設定 */

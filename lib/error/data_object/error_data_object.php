@@ -1,6 +1,7 @@
 <?php
 namespace Sora_Kanata\Tor_Filter\Lib\Error\Data_Object;
 
+
 class Error_Data_Object
 {
     /* # Proparty */
@@ -22,13 +23,13 @@ class Error_Data_Object
             array(
                 'DataItems' => 
                     array(
-                        array("data_index" => 0, "data_name" => "title", "value" => &$this->Title, "method_name" => "Title", "required_flag" => true),
-                        array("data_index" => 1, "data_name" => "description", "value" => &$this->Description, "method_name" => "Description", "required_flag" => true),
-                        array("data_index" => 2, "data_name" => "file_path", "value" => &$this->File_Path,  "method_name" => "FilePath", "required_flag" => false),
-                        array("data_index" => 3, "data_name" => "line_number", "value" => &$this->File_Line_Number, "method_name" => "LineNumber",  "required_flag" => false),
-                        array("data_index" => 4, "data_name" => "class_name", "value" => &$this->Class_Name,  "method_name" => "ClassName",  "required_flag" => false),
-                        array("data_index" => 5, "data_name" => "function_name", "value" => &$this->Function_Name,  "method_name" => "FunctionName",  "required_flag" => false),
-                        array("data_index" => 6, "data_name" => "timestamp", "value" => &$this->TimeStamp,  "method_name" => "",  "required_flag" => false)
+                        array("data_index" => 0, "data_name" => "title", "value" => &$this->Title, "method_name" => "Title", "readonly_flag" => true, "required_flag" => true),
+                        array("data_index" => 1, "data_name" => "description", "value" => &$this->Description, "method_name" => "Description", "readonly_flag" => true, "required_flag" => true),
+                        array("data_index" => 2, "data_name" => "file_path", "value" => &$this->File_Path,  "method_name" => "FilePath", "readonly_flag" => true, "required_flag" => false),
+                        array("data_index" => 3, "data_name" => "line_number", "value" => &$this->File_Line_Number, "method_name" => "LineNumber", "readonly_flag" => true, "required_flag" => false),
+                        array("data_index" => 4, "data_name" => "class_name", "value" => &$this->Class_Name,  "method_name" => "ClassName", "readonly_flag" => true, "required_flag" => false),
+                        array("data_index" => 5, "data_name" => "function_name", "value" => &$this->Function_Name,  "method_name" => "FunctionName", "readonly_flag" => true, "required_flag" => false),
+                        array("data_index" => 6, "data_name" => "timestamp", "value" => &$this->TimeStamp,  "method_name" => "", "readonly_flag" => true, "required_flag" => false)
                     )
             );
         $this->Title($Title);
@@ -40,9 +41,27 @@ class Error_Data_Object
         $this->TimeStamp = time();
     }
 
+    private function IsReadonly(string $Function_Name)
+    {
+        $readonly_flag = false;
+        if(isset($this->Object_Config['DataItems']))
+        {
+            $method_name_list = array_column($this->Object_Config['DataItems'], "method_name");
+            $search_key = array_search($Function_Name, $method_name_list);
+            if($search_key !== false)
+            {
+                if(isset($this->Object_Config['DataItems'][$search_key]['readonly_flag']) and is_bool($this->Object_Config['DataItems'][$search_key]['readonly_flag']))
+                {
+                    $readonly_flag = boolval($this->Object_Config['DataItems'][$search_key]['readonly_flag']);
+                }
+            }
+        }
+        return $readonly_flag;
+    }
+
     public function Title($Value = null)
     {
-        $read_only = true;
+        $read_only = $this->IsReadonly(__FUNCTION__);
         $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
@@ -56,7 +75,7 @@ class Error_Data_Object
 
     public function Description($Value = null)
     {
-        $read_only = true;
+        $read_only = $this->IsReadonly(__FUNCTION__);
         $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);        
         if(is_null($Value))
        {
@@ -70,7 +89,7 @@ class Error_Data_Object
 
     public function FilePath($Value = null)
     {
-        $read_only = true;
+        $read_only = $this->IsReadonly(__FUNCTION__);
         $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
@@ -87,7 +106,7 @@ class Error_Data_Object
 
     public function LineNumber($Value = null)
     {
-        $read_only = true;
+        $read_only = $this->IsReadonly(__FUNCTION__);
         $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
@@ -104,7 +123,7 @@ class Error_Data_Object
 
     public function ClassName($Value = null)
     {
-        $read_only = true;
+        $read_only = $this->IsReadonly(__FUNCTION__);
         $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
@@ -118,7 +137,7 @@ class Error_Data_Object
 
     public function FunctionName($Value = null)
     {
-        $read_only = true;
+        $read_only = $this->IsReadonly(__FUNCTION__);
         $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
