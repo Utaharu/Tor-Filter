@@ -1,7 +1,6 @@
 <?php
 namespace Sora_Kanata\Tor_Filter\Lib\Error\Data_Object;
 
-
 class Error_Data_Object
 {
     /* # Proparty */
@@ -11,11 +10,13 @@ class Error_Data_Object
     private string $Title = "";
     private string $Description = "";
     private string $File_Path = "";
-    private int $File_Line_Number = 0;
+    private int $File_Line_Number = -1;
     private string $Class_Name = "";
     private string $Function_Name = "";
-    private int $TimeStamp = 0;
+    private int $TimeStamp = -1;
+
     private array $Required_Flags = array();
+    private array $Written_Flags = array();
 
     function __construct(string $Title = null, string $Description = null , string $File = null, string $Class = null , string $Function = null, ?int $Line_Number = null)
     {
@@ -41,13 +42,13 @@ class Error_Data_Object
         $this->TimeStamp = time();
     }
 
-    private function IsReadonly(string $Function_Name)
+    private function IsReadonly(string $Method_Name)
     {
         $readonly_flag = false;
         if(isset($this->Object_Config['DataItems']))
         {
             $method_name_list = array_column($this->Object_Config['DataItems'], "method_name");
-            $search_key = array_search($Function_Name, $method_name_list);
+            $search_key = array_search($Method_Name, $method_name_list);
             if($search_key !== false)
             {
                 if(isset($this->Object_Config['DataItems'][$search_key]['readonly_flag']) and is_bool($this->Object_Config['DataItems'][$search_key]['readonly_flag']))
@@ -62,12 +63,11 @@ class Error_Data_Object
     public function Title($Value = null)
     {
         $read_only = $this->IsReadonly(__FUNCTION__);
-        $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
             return $this->Title;
         }
-        elseif($read_only === false or ($read_only === true and $caller[1]['class'] === __CLASS__))
+        elseif($read_only === false or ($read_only === true and $this->CheckIfWritten(__FUNCTION__) === false))
         {
             $this->Title = $Value;
         }
@@ -75,13 +75,12 @@ class Error_Data_Object
 
     public function Description($Value = null)
     {
-        $read_only = $this->IsReadonly(__FUNCTION__);
-        $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);        
+        $read_only = $this->IsReadonly(__FUNCTION__);       
         if(is_null($Value))
        {
             return $this->Description;
        }
-       elseif($read_only === false or ($read_only === true and $caller[1]['class'] === __CLASS__))
+       elseif($read_only === false or ($read_only === true and $this->CheckIfWritten(__FUNCTION__) === false))
        {
             $this->Description = $Value;
        }
@@ -90,12 +89,11 @@ class Error_Data_Object
     public function FilePath($Value = null)
     {
         $read_only = $this->IsReadonly(__FUNCTION__);
-        $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
             return $this->File_Path;
         }
-        elseif($read_only === false or ($read_only === true and $caller[1]['class'] === __CLASS__))
+        elseif($read_only === false or ($read_only === true and $this->CheckIfWritten(__FUNCTION__) === false))
         {
             if(is_file($Value))
             {
@@ -107,12 +105,11 @@ class Error_Data_Object
     public function LineNumber($Value = null)
     {
         $read_only = $this->IsReadonly(__FUNCTION__);
-        $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
             return $this->File_Line_Number;
         }
-        elseif($read_only === false or ($read_only === true and $caller[1]['class'] === __CLASS__))
+        elseif($read_only === false or ($read_only === true and $this->CheckIfWritten(__FUNCTION__) === false))
         {
             if(is_numeric($Value))
             {
@@ -129,7 +126,7 @@ class Error_Data_Object
         {
             return $this->Class_Name;
         }
-        elseif($read_only === false or ($read_only === true and $caller[1]['class'] === __CLASS__))
+        elseif($read_only === false or ($read_only === true and $this->CheckIfWritten(__FUNCTION__) === false))
         {
             $this->Class_Name = $Value;
         }
@@ -138,14 +135,27 @@ class Error_Data_Object
     public function FunctionName($Value = null)
     {
         $read_only = $this->IsReadonly(__FUNCTION__);
-        $caller = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
         if(is_null($Value))
         {
             return $this->Function_Name;
         }
-        elseif($read_only === false or ($read_only === true and $caller[1]['class'] === __CLASS__))
+        elseif($read_only === false or ($read_only === true and $this->CheckIfWritten(__FUNCTION__) === false))
         {
             $this->Function_Name = $Value;
+        }
+    }
+
+    private function CheckIfWritten(string $Method_Name)
+    {
+        $wrote_key = array_search($Method_Name, $this->Written_Flags, true);
+        if($wrote_key === false)
+        {
+            $this->Written_Flags[] = $Method_Name;
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 
